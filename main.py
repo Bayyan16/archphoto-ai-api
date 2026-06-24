@@ -14,7 +14,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
-        "https://archphoto-ai.vercel.app",
+        "https://archphoto-ai-4wbk.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
