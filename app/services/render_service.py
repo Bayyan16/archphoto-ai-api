@@ -11,6 +11,9 @@ def create_render_job(
     mood: str,
     realism_level: str,
     geometry_lock: str,
+    camera_lock: str = "high",
+    material_lock: str = "high",
+    facade_lock: str = "high",
 ) -> Dict[str, object]:
     """
     Main render orchestration service.
@@ -29,6 +32,9 @@ def create_render_job(
         mood=mood,
         realism_level=realism_level,
         geometry_lock=geometry_lock,
+        camera_lock=camera_lock,
+        material_lock=material_lock,
+        facade_lock=facade_lock,
     )
 
     ai_result = enhance_image_with_ai_engine(
@@ -38,6 +44,9 @@ def create_render_job(
         mood=mood,
         realism_level=realism_level,
         geometry_lock=geometry_lock,
+        camera_lock=camera_lock,
+        material_lock=material_lock,
+        facade_lock=facade_lock,
     )
 
     return {

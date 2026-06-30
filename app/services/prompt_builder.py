@@ -8,6 +8,9 @@ class PromptPackage:
     preservation_instruction: str
     scene_instruction: str
     mood_instruction: str
+    camera_instruction: str
+    material_instruction: str
+    facade_instruction: str
 
 
 SCENE_INSTRUCTIONS = {
@@ -88,32 +91,42 @@ GEOMETRY_LOCK_INSTRUCTIONS = {
 }
 
 
-def build_preservation_instruction(geometry_lock: str) -> str:
-    return GEOMETRY_LOCK_INSTRUCTIONS.get(
-        geometry_lock,
-        GEOMETRY_LOCK_INSTRUCTIONS["high"],
-    )
+LOCK_DETAIL_INSTRUCTIONS = {
+    "low": "Allow minor refinement, but avoid major changes.",
+    "medium": "Preserve the main structure and identity with only subtle improvements.",
+    "high": "Strictly preserve this element. Do not alter its shape, position, proportion, or identity.",
+}
 
 
 def build_scene_instruction(scene_type: str) -> str:
-    return SCENE_INSTRUCTIONS.get(
-        scene_type,
-        SCENE_INSTRUCTIONS["exterior"],
-    )
+    return SCENE_INSTRUCTIONS.get(scene_type, SCENE_INSTRUCTIONS["exterior"])
 
 
 def build_mood_instruction(mood: str) -> str:
-    return MOOD_INSTRUCTIONS.get(
-        mood,
-        MOOD_INSTRUCTIONS["daylight"],
-    )
+    return MOOD_INSTRUCTIONS.get(mood, MOOD_INSTRUCTIONS["daylight"])
 
 
 def build_realism_instruction(realism_level: str) -> str:
-    return REALISM_INSTRUCTIONS.get(
-        realism_level,
-        REALISM_INSTRUCTIONS["medium"],
-    )
+    return REALISM_INSTRUCTIONS.get(realism_level, REALISM_INSTRUCTIONS["medium"])
+
+
+def build_preservation_instruction(geometry_lock: str) -> str:
+    return GEOMETRY_LOCK_INSTRUCTIONS.get(geometry_lock, GEOMETRY_LOCK_INSTRUCTIONS["high"])
+
+
+def build_camera_instruction(camera_lock: str) -> str:
+    lock_text = LOCK_DETAIL_INSTRUCTIONS.get(camera_lock, LOCK_DETAIL_INSTRUCTIONS["high"])
+    return f"Camera preservation: {camera_lock}. {lock_text} Keep the original camera angle, lens perspective, framing, and composition."
+
+
+def build_material_instruction(material_lock: str) -> str:
+    lock_text = LOCK_DETAIL_INSTRUCTIONS.get(material_lock, LOCK_DETAIL_INSTRUCTIONS["high"])
+    return f"Material preservation: {material_lock}. {lock_text} Enhance realism without changing the intended material palette, color identity, or surface logic."
+
+
+def build_facade_instruction(facade_lock: str) -> str:
+    lock_text = LOCK_DETAIL_INSTRUCTIONS.get(facade_lock, LOCK_DETAIL_INSTRUCTIONS["high"])
+    return f"Facade preservation: {facade_lock}. {lock_text} Keep facade rhythm, openings, window positions, balcony lines, floor count, roof line, and architectural identity."
 
 
 def build_negative_prompt() -> str:
@@ -123,7 +136,7 @@ def build_negative_prompt() -> str:
         "changed roof shape, changed massing, broken road layout, altered landscape layout, fake signage, "
         "unreadable text, cartoon, illustration, anime, fantasy, surreal, plastic materials, over-saturated, "
         "over-sharpened, unrealistic CGI, low quality, blurry, noisy, artifacts, deformed people, "
-        "bad reflections, unnatural shadows, inconsistent lighting"
+        "bad reflections, unnatural shadows, inconsistent lighting, excessive redesign, invented architecture"
     )
 
 
@@ -132,11 +145,17 @@ def build_archviz_prompt(
     mood: str,
     realism_level: str,
     geometry_lock: str,
+    camera_lock: str = "high",
+    material_lock: str = "high",
+    facade_lock: str = "high",
 ) -> PromptPackage:
     scene_instruction = build_scene_instruction(scene_type)
     mood_instruction = build_mood_instruction(mood)
     realism_instruction = build_realism_instruction(realism_level)
     preservation_instruction = build_preservation_instruction(geometry_lock)
+    camera_instruction = build_camera_instruction(camera_lock)
+    material_instruction = build_material_instruction(material_lock)
+    facade_instruction = build_facade_instruction(facade_lock)
 
     positive_prompt = (
         "Enhance this raw architectural render into a highly realistic professional architectural photograph. "
@@ -145,6 +164,9 @@ def build_archviz_prompt(
         f"{mood_instruction} "
         f"{realism_instruction} "
         f"{preservation_instruction} "
+        f"{camera_instruction} "
+        f"{material_instruction} "
+        f"{facade_instruction} "
         "Improve only lighting quality, material realism, texture detail, glass reflections, realistic shadows, "
         "vegetation realism, sky realism, atmosphere, depth, color grading, exposure, and photographic clarity. "
         "Keep the original design intent, original composition, original camera framing, and architectural identity. "
@@ -158,4 +180,7 @@ def build_archviz_prompt(
         preservation_instruction=preservation_instruction,
         scene_instruction=scene_instruction,
         mood_instruction=mood_instruction,
+        camera_instruction=camera_instruction,
+        material_instruction=material_instruction,
+        facade_instruction=facade_instruction,
     )

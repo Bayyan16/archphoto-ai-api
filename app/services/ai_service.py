@@ -19,8 +19,9 @@ def _apply_basic_photographic_enhancement(
 ) -> Image.Image:
     """
     Temporary local image enhancement.
-    This is NOT the final AI engine.
-    This keeps the backend flow stable until a real image-to-image AI provider is integrated.
+
+    This is not the final AI engine.
+    It keeps backend-output flow stable until a real image-to-image AI provider is integrated.
     """
 
     image = ImageEnhance.Sharpness(image).enhance(1.22)
@@ -62,6 +63,9 @@ def enhance_image_with_ai_engine(
     mood: str,
     realism_level: str,
     geometry_lock: str,
+    camera_lock: str,
+    material_lock: str,
+    facade_lock: str,
 ) -> Dict[str, object]:
     """
     AI engine boundary.
@@ -96,5 +100,8 @@ def enhance_image_with_ai_engine(
             "mood": mood,
             "realism_level": realism_level,
             "geometry_lock": geometry_lock,
+            "camera_lock": camera_lock,
+            "material_lock": material_lock,
+            "facade_lock": facade_lock,
         },
     }
