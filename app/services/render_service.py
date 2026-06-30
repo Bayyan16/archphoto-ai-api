@@ -1,39 +1,52 @@
-import os
 import uuid
-from PIL import Image, ImageEnhance, ImageFilter
+from typing import Dict
 
-OUTPUT_DIR = "storage/outputs"
+from app.services.ai_service import enhance_image_with_ai_engine
+from app.services.prompt_builder import build_archviz_prompt
 
-os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-
-def enhance_render_mock(
+def create_render_job(
     input_path: str,
     scene_type: str,
     mood: str,
     realism_level: str,
     geometry_lock: str,
-) -> str:
-    image = Image.open(input_path).convert("RGB")
+) -> Dict[str, object]:
+    """
+    Main render orchestration service.
 
-    image = ImageEnhance.Sharpness(image).enhance(1.25)
-    image = ImageEnhance.Contrast(image).enhance(1.08)
-    image = ImageEnhance.Color(image).enhance(1.04)
+    Flow:
+    1. Create job_id
+    2. Build archviz prompt package
+    3. Send image + prompt package to AI service boundary
+    4. Return normalized job result
+    """
 
-    if mood == "golden-hour":
-        image = ImageEnhance.Color(image).enhance(1.12)
-        image = ImageEnhance.Contrast(image).enhance(1.06)
+    job_id = f"render_{uuid.uuid4().hex}"
 
-    if mood == "night":
-        image = ImageEnhance.Brightness(image).enhance(0.82)
-        image = ImageEnhance.Contrast(image).enhance(1.15)
+    prompt_package = build_archviz_prompt(
+        scene_type=scene_type,
+        mood=mood,
+        realism_level=realism_level,
+        geometry_lock=geometry_lock,
+    )
 
-    if realism_level == "high":
-        image = image.filter(ImageFilter.SHARPEN)
+    ai_result = enhance_image_with_ai_engine(
+        input_path=input_path,
+        prompt_package=prompt_package,
+        scene_type=scene_type,
+        mood=mood,
+        realism_level=realism_level,
+        geometry_lock=geometry_lock,
+    )
 
-    output_filename = f"{uuid.uuid4()}.jpg"
-    output_path = os.path.join(OUTPUT_DIR, output_filename)
-
-    image.save(output_path, quality=95)
-
-    return output_path.replace("\\", "/")
+    return {
+        "job_id": job_id,
+        "status": "completed",
+        "original_path": input_path.replace("\\", "/"),
+        "output_path": ai_result["output_path"],
+        "engine": ai_result["engine"],
+        "engine_status": ai_result["engine_status"],
+        "settings": ai_result["settings"],
+        "prompt_package": ai_result["prompt_package"],
+    }
